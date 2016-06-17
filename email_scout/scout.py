@@ -72,17 +72,24 @@ class Spider:
         found= ''
         for items in self.fond_mails:
             found += '{}\n'.format(items)
-        with open('found_emails.txt','w') as file:
-            file.write(found)
-            file.close()
         return found
 
     def printall(self, request):
         print('+' * 64, '\n [+] current link in process = {}'.format(request),
                 '\n [*] request links left= {}\n'.format(len(self.tasklist)),
                 '[*] response links status= {}\n'.format(len(self.perfected)),
-                '[*] Emails found = {}\n'.format(len(self.fond_mails)),
+                '[*] Emails found not sorted = {}\n'.format(len(self.fond_mails)),
                 'Press Ctrl+C to exit\n')
+    def filewriter(self):
+        found = ''
+        for items in self.fond_mails:
+            try:
+                found += '{}\n'.format(str(items))
+            except:
+                pass
+        return found
+
+
 
 def main():
     site_parse = Spider()
@@ -94,6 +101,9 @@ def main():
         print('\n\n[-] KeyboardInterrupt = Exit')
     print('Program Ends...')
     print(site_parse,'\n [+] all results write in found_emails.txt')
+    with open('found_emails.txt', 'w') as file:
+        file.write(site_parse.filewriter())
+        file.close()
 
 
 

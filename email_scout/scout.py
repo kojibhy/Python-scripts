@@ -15,7 +15,6 @@ class Spider:
         self.tasklist = []
         self.perfected = []
         self.fond_mails = {}
-        self.filter_by = ['.exe', '.pdf', '.jpg', '.png', '.rar', '.zip', '.apk']
 
     def add_task(self, request):
         main_link = urllib.parse.urlparse(request)
@@ -27,10 +26,7 @@ class Spider:
             self.tasklist.append(request)
 
     def srch_page(self, request):
-        for items in self.filter_by:
-            if request[-4:] == items:
-                raise ValueError
-        html = urllib.request.urlopen(request).read().decode('utf-8', errors='ignore')
+        html = urllib.request.urlopen(request).read().decode()
         mailsrch = re.compile(r'[\w\-][\w\-\.]+@[\w\-][\w\-\.]+[a-zA-Z]{1,4}')
         found = mailsrch.findall(html)
         for item in found:
@@ -38,7 +34,7 @@ class Spider:
     def spider_searcher(self, request):
         found_links = []
         search = re.compile(r'^/\w+')
-        html = urllib.request.urlopen(request).read().decode('utf-8', errors='ignore')
+        html = urllib.request.urlopen(request).read().decode()
         pars_link = urllib.parse.urlparse(request)
         soup = (BeautifulSoup(html, "html.parser")).findAll('a')
         for link in soup:
@@ -98,7 +94,6 @@ class Spider:
 def main():
     site_parse = Spider()
     site_parse.add_task(args['url'])
-    site_parse.filter_by.append(args['ignore'])
     print('Start Program...')
     try:
         site_parse.spider()
@@ -114,8 +109,6 @@ def main():
 
 parser = argparse.ArgumentParser(description='Site Email spider')
 parser.add_argument('-u', '--url', help='set url in format http://exemple.com', required=True)
-parser.add_argument('-ignore', '--ignore', help='ignore site fils exemple.com/installer.exe by default ignore: /'
-                                                '.exe .pdf .jpg .png .rar .zip .apk', required=False)
 
 args = vars(parser.parse_args())
 

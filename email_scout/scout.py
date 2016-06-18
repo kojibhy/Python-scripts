@@ -27,7 +27,7 @@ class Spider:
 
     def srch_page(self, request):
         html = urllib.request.urlopen(request).read().decode()
-        mailsrch = re.compile(r"([\w\.\-_]+)?\w+@[\w\.\-_]+(\.\w+){1,}")
+        mailsrch = re.compile(r"/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])+/g")
         found = mailsrch.findall(html)
         for item in found:
             self.fond_mails[item] = 1

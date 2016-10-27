@@ -63,7 +63,9 @@ def make_config(wlan=None,name=None,chanel=None, password=None):
               'dhcp-range=10.0.0.10,10.0.0.250,12h\n'
               'dhcp-option=3,10.0.0.1\n'
               'dhcp-option=6,10.0.0.1\n'
-              'server=8.8.8.8\n').format(wifi_wlan=wlan)
+              'server=8.8.8.8\n'
+              'log-queries\n'
+              'log-facility=/var/log/dnsmasq.log\n').format(wifi_wlan=wlan)
     with open('hostapd.conf', 'w') as config_hostapd:
         config_hostapd.write(hostapd)
         config_hostapd.close()

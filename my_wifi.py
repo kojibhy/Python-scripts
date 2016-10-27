@@ -1,6 +1,6 @@
 import os
 import sys
-from subprocess import Popen, PIPE
+import subprocess
 import argparse
 import time
 
@@ -17,9 +17,16 @@ def parse_args():
               )
     )
     parser.add_argument(
+        "-g",
+        "--gateway",
+        help=("Select gateway interface. " +
+              "default 'eth0'"
+              )
+    )
+    parser.add_argument(
         "-s",
         "--ssid",
-        help=("Enter the ESSID of the rogue Access Point. " +
+        help=("Enter the ESSID Name for Access Point. " +
               "Example: --ssid 'Free WiFi'." +
               "default name 'Free-WIFI'"
               )
@@ -70,38 +77,44 @@ def check_args(args):
 
     if args.interface == None:
         args.interface = 'wlan0'
+        print('[*] default value wlan0')
+    if args.gateway == None:
+        args.gateway = 'eth0'
+        print('[*] default value eth0')
     if args.ssid == None:
         args.ssid = 'Free-WIFI'
+        print('[*] default name Free-WIFI')
     if args.channel == None:
         args.channel = '6'
-def start_extentions(wlan=None):
-    def execute(obj):
-        with Popen(obj, stdout=PIPE) as proc:
-            print(proc.stdout.read().decode())
+        print('[*] default channel 6')
 
-    execute(['killall', 'hostapd'])
-    execute(['killall', 'dnsmasq'])
+def start_extentions(wlan=None, gateway=None):
+    subprocess.call('killall hostapd', shell=True)
+    subprocess.call('killall dnsmasq', shell=True)
 
     time.sleep(3)
 
     hostapd_conf_dir = BASE_DIR + '/' + 'hostapd.conf'
     dnsmasq_conf_dir = BASE_DIR + '/' + 'dnsmasq.conf'
-
-    execute(['service', 'network-manager','stop'])
-    execute(['ifconfig', wlan, '10.0.0.1'])
-    execute(['ifconfig', wlan, 'up'])
+    iptables = "iptables --table nat -A POSTROUTING -o {0} -j MASQUERADE".format(gateway)
 
     os.system("gnome-terminal -e 'bash -c \"hostapd -t {} ; exec bash\"'".format(hostapd_conf_dir))
     os.system("gnome-terminal -e 'bash -c \"dnsmasq -C {}  -d; exec bash\"'".format(dnsmasq_conf_dir))
+
+    time.sleep(3)
+    subprocess.call('sysctl -w net.ipv4.ip_forward=1', shell=True)
+    subprocess.call('service network-manager stop', shell=True)
+    subprocess.call('ifconfig {0} 10.0.0.1'.format(wlan), shell=True)
+    subprocess.call('ifconfig {0} up'.format(wlan), shell=True)
+    subprocess.call(iptables, shell=True)
+
 
 def start_app():
     args = parse_args()
     check_args(args)
     make_config(wlan=args.interface, name=args.ssid, chanel=args.channel,password=args.presharedkey)
-    start_extentions(wlan=args.interface)
+    start_extentions(wlan=args.interface,gateway=args.gateway)
 
 
 if __name__ == "__main__":
     start_app()
-
-

